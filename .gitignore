@@ -1,0 +1,20 @@
+# Environment variables
+.env
+
+# Docker files
+dockerfile
+dockerfile.rddock
+docker-compose.yaml
+default.conf
+startapp.sh
+syslog-ng.conf
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Runtime data
+.DS_Store
