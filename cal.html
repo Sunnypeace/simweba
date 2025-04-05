@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Extractor</title>
+    <style>
+        /* Add some basic styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        input, textarea {
+            width: 100%;
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Digit Extractor</h1>
+    <label for="inputText">Enter text:</label>
+    <input type="text" id="inputText" placeholder="Type something here...">
+    
+    <button onclick="extractDigits()">Extract Digits</button>
+    
+    <label for="outputText">Extracted Digits:</label>
+    <textarea id="outputText" rows="4" readonly></textarea>
+
+    <script>
+        function extractDigits() {
+            const inputText = document.getElementById('inputText').value;
+            const matches = inputText.match(/Time taken: (\d+\.\d+) seconds/g);
+            const digits = matches ? matches.map(match => match.match(/(\d+\.\d+)/)[1]) : [];
+            const outputText = digits.join('\n') + '\n'; // Join with newline and append a newline character
+            document.getElementById('outputText').value = outputText;
+        }
+    </script>
+</body>
+</html>

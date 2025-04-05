@@ -1,0 +1,92 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eight Characters Table</title>
+<style>
+  table {
+    border-collapse: collapse;
+    width: 80%; /* Default width */
+    margin: auto;
+  }
+  th, td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+  }
+  th {
+    background-color: #f2f2f2;
+  }
+  .eight-char-table {
+      margin-top: 20px;
+      width: 60%;
+      table-layout: fixed;
+  }
+  .eight-char-table tr:nth-child(2),
+  .eight-char-table tr:nth-child(3) {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: blue;
+  }
+  .dayun-table, .liunian-table {
+    margin-bottom: 30px;
+    width: 80%; /* Other tables remain at 80% */
+    table-layout: fixed;
+  }
+  .dayun-table td, .liunian-table td {
+    width: 10%;
+  }
+
+  
+  liunian-table
+    body {
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Ensure the body takes up at least the full viewport height */
+    max-width: 600px;
+    margin: 0; /* Remove default body margin */
+  }
+
+  h2 {
+    text-align: center; /* Redundant if already centered by flexbox, but good for fallback */
+  }
+
+h3 {
+  text-align: center;
+  font-size: large; /* or use a specific size like 20px, 1.2em, etc. */
+  font-weight: bold;
+}
+
+</style>
+</head>
+<body>
+    
+    <h2>八字排算</h2>
+    <h3>john651 男 ：西曆: 2025-04-21 農曆:2025-3-24</h3>
+    <table class="eight-char-table">
+        <tr><td>財</td><td>日</td><td>比</td><td>財</td></tr>
+        <tr><td>乙</td><td>庚</td><td>庚</td><td>乙</td></tr>
+        <tr><td>酉</td><td>申</td><td>辰</td><td>巳</td></tr>
+        <tr><td>辛</td><td>庚 壬 戊</td><td>戊 乙 癸</td><td>丙 庚 戊</td></tr>
+        <tr><td>劫</td><td>比 食 梟</td><td>梟 財 傷</td><td>殺 比 梟</td></tr>
+    </table>
+
+    
+    <h2>大運</h2>
+    <table class="dayun-table">
+        <tr><td>2030</td><td>2040</td><td>2050</td><td>2060</td><td>2070</td><td>2080</td><td>2090</td><td>2100</td><td>2110</td></tr>
+        <tr><td>6岁</td><td>16岁</td><td>26岁</td><td>36岁</td><td>46岁</td><td>56岁</td><td>66岁</td><td>76岁</td><td>86岁</td></tr>
+        <tr><td>己卯</td><td>戊寅</td><td>丁丑</td><td>丙子</td><td>乙亥</td><td>甲戌</td><td>癸酉</td><td>壬申</td><td>辛未</td></tr>
+    </table>
+
+    
+    <h2>流年</h2>
+    <table class="liunian-table">
+        <tr><td>2030</td><td>2031</td><td>2032</td><td>2033</td><td>2034</td><td>2035</td><td>2036</td><td>2037</td><td>2038</td><td>2039</td></tr><tr><td>庚戌</td><td>辛亥</td><td>壬子</td><td>癸丑</td><td>甲寅</td><td>乙卯</td><td>丙辰</td><td>丁巳</td><td>戊午</td><td>己未</td></tr><tr><td>2040</td><td>2041</td><td>2042</td><td>2043</td><td>2044</td><td>2045</td><td>2046</td><td>2047</td><td>2048</td><td>2049</td></tr><tr><td>庚申</td><td>辛酉</td><td>壬戌</td><td>癸亥</td><td>甲子</td><td>乙丑</td><td>丙寅</td><td>丁卯</td><td>戊辰</td><td>己巳</td></tr><tr><td>2050</td><td>2051</td><td>2052</td><td>2053</td><td>2054</td><td>2055</td><td>2056</td><td>2057</td><td>2058</td><td>2059</td></tr><tr><td>庚午</td><td>辛未</td><td>壬申</td><td>癸酉</td><td>甲戌</td><td>乙亥</td><td>丙子</td><td>丁丑</td><td>戊寅</td><td>己卯</td></tr><tr><td>2060</td><td>2061</td><td>2062</td><td>2063</td><td>2064</td><td>2065</td><td>2066</td><td>2067</td><td>2068</td><td>2069</td></tr><tr><td>庚辰</td><td>辛巳</td><td>壬午</td><td>癸未</td><td>甲申</td><td>乙酉</td><td>丙戌</td><td>丁亥</td><td>戊子</td><td>己丑</td></tr><tr><td>2070</td><td>2071</td><td>2072</td><td>2073</td><td>2074</td><td>2075</td><td>2076</td><td>2077</td><td>2078</td><td>2079</td></tr><tr><td>庚寅</td><td>辛卯</td><td>壬辰</td><td>癸巳</td><td>甲午</td><td>乙未</td><td>丙申</td><td>丁酉</td><td>戊戌</td><td>己亥</td></tr><tr><td>2080</td><td>2081</td><td>2082</td><td>2083</td><td>2084</td><td>2085</td><td>2086</td><td>2087</td><td>2088</td><td>2089</td></tr><tr><td>庚子</td><td>辛丑</td><td>壬寅</td><td>癸卯</td><td>甲辰</td><td>乙巳</td><td>丙午</td><td>丁未</td><td>戊申</td><td>己酉</td></tr>
+    </table>
+
+</body>
+</html>

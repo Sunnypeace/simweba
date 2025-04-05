@@ -1,0 +1,14 @@
+
+services:
+  web-server:
+    image: sim-weba
+    container_name: shc_sim-weba
+    build:
+      context: .  # Current directory (where docker-compose.yml is)
+      dockerfile: dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development

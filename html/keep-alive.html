@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Keep Render App Alive</title>
+<style>
+  #log {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    font-family: monospace;
+    font-size: 14px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  button {
+    padding: 8px 15px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  input[type="number"] {
+    padding: 6px;
+    width: 80px;
+  }
+  .controls {
+    margin-bottom: 10px;
+  }
+  #clock {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  #pingCount {
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Pinging Render App</h1>
+
+<div id="clock"></div>
+
+<div class="controls">
+  Ping Interval (minutes): <input type="number" id="intervalInput" value="10" min="1">
+  <button id="startPingButton">Start Auto Ping</button>
+  <button id="stopPingButton" disabled>Stop Auto Ping</button>
+  <button id="pingButton">Send Ping Now</button>
+</div>
+
+<div>
+  Total Pings: <span id="pingCount">0</span>
+</div>
+
+<div id="log"></div>
+
+<script src="keep-alive.js"></script>
+
+</body>
+</html>

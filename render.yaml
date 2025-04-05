@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: web-server
+    env: docker
+    buildCommand: "docker build -t sh-weba ."
+    startCommand: "docker run -p 3001:3001 sh-weba"
+    envVars:
+      - key: NODE_ENV
+        value: production
+    healthCheckPath: /api/test
+    plan: free

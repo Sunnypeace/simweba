@@ -1,0 +1,43 @@
+# Stage 1: Build Node.js app
+FROM node:18 AS builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm install
+COPY . .
+#RUN npm run build  
+# <-- Outputs to `/app/dist`
+
+# Stage 2: Final Image (Alpine-based)
+FROM nginx:alpine
+
+# Set timezonee to Hong Kong
+RUN apk add --no-cache tzdata && \
+    cp /usr/share/zoneinfo/Asia/Hong_Kong /etc/localtime && \
+    echo "Asia/Hong_Kong" > /etc/timezone && \
+    apk del tzdata
+
+# Install Node.js to run your app
+RUN apk add --update --no-cache  nodejs npm
+
+# Copy Nginx config (using template for Render's PORT)
+#COPY default.conf /etc/nginx/templates/default.conf.template
+COPY default.conf /etc/nginx/http.d
+
+# Copy built frontend files
+#COPY --from=builder /app/html /usr/share/nginx/html
+
+# Copy Node.js backend
+#OPY --from=builder /app /usr/share/nginx/html  # <-- Only copied built files
+# ^-- Final image has NO trace of `node:18` or dev dependencies!
+
+WORKDIR /app
+
+# Install production dependencies only
+#RUN npm ci --only=production
+
+# Startup script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+EXPOSE 80 3001
+CMD ["/start.sh"]
