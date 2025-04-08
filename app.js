@@ -8,6 +8,8 @@ const winston = require("winston");
 const WinstonSyslog = require("winston-syslog").Syslog;
 const { exec } = require('child_process');
 const os = require('os');
+const fs = require('fs');
+const path = require('path'); // Ensure path module is required
 
 
 let queueCnt =1;
@@ -68,10 +70,10 @@ const logger = winston.createLogger({
 
 const app = express();  // this must put before the cors
 
-// Add static file serving before other middleware
-app.use(express.static('html')); 
-// Serve static files from the 'html' directory
-// app.use(express.static(path.join(__dirname, 'html')));
+// Add favicon handling
+app.get('/favicon.ico', (req, res) => {
+    res.status(204).end(); // No content response
+});
 
 //app.use(cors());
 //✅ Allow specific origins and methods
@@ -87,6 +89,36 @@ app.options("*", (req, res) => {
     res.header("Access-Control-Allow-Headers", "Content-Type");
     res.sendStatus(200);
 });
+
+
+// Add static file serving before other middleware
+// app.use(express.static('html')); 
+// Serve static files from the 'html' directory
+
+
+// Add this new endpoint to list MP3 and OGG files
+app.get('/app/songs', (req, res) => {
+    const songsDir = path.join(__dirname, 'songs');
+    fs.readdir(songsDir, (err, files) => {
+        if (err) {
+            console.error('Error reading songs directory:', err);
+            return res.status(500).json({ error: 'Unable to read songs directory' });
+        }
+        // Filter for MP3 and OGG files
+        const audioFiles = files.filter(file => {
+            const lowerFile = file.toLowerCase();
+            return lowerFile.endsWith('.mp3') || lowerFile.endsWith('.ogg');
+        });
+        res.json(audioFiles);
+    });
+});
+
+app.use('/app/songs', express.static(path.join(__dirname, 'songs')));
+
+// Then your existing static file middleware
+app.use('/app/html', express.static(path.join(__dirname, 'html'))); 
+// Add static file serving before other middleware
+app.use(express.static('html')); 
 
 
 // app.use(bodyParser.urlencoded({ extended: true }));
