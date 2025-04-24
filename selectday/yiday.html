@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lunar Dates Generator</title>
+  <script src="lunar-1.7.js"></script>
+</head>
+<title>Lunar Dates Generator</title>
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* 水平居中 */
+        justify-content: flex-start; /* 垂直居中，或者 flex-start 看你的需求 */
+        min-height: 100vh; /* 确保内容至少占据整个视口的高度 */
+        margin: 0; /* 移除默认的 margin */
+    }
+    textarea {        width: 300px; height: 100px;   }
+    .input-container {   text-align: right; /*让label和input左对齐*/   }
+</style>
+</head>
+<body>
+<h1>Lunar Dates Generator</h1>
+
+<div class="input-container">
+    <label for="fromDate">From Date:</label>
+    <input type="date" id="fromDate" value="2025-01-01"><br>
+
+    <label for="toDate">To Date:</label>
+    <input type="date" id="toDate" value="2025-12-31"><br>
+</div>
+<br>
+<button onclick="generateAndDownload()">Generate CSV</button>
+<br><br>
+<h2>Generate Marriage Date HTML</h2>
+<label for="inputData">Enter names and dates (one per line):</label><br>
+<textarea id="inputData" rows="5" placeholder="e.g., 
+張英明
+李樂芝
+2018-10-31
+2018.12.30
+2018/12/18"></textarea><br>
+<button onclick="generateMarriageHtml()">Generate HTML</button>
+
+  <script>
+    const ganMap = { '甲': 0, '乙': 1, '丙': 2, '丁': 3, '戊': 4, '己': 5, '庚': 6, '辛': 7, '壬': 8, '癸': 9 };
+    const zhiMap = { '子': 0, '丑': 1, '寅': 2, '卯': 3, '辰': 4, '巳': 5, '午': 6, '未': 7, '申': 8, '酉': 9, '戌': 10, '亥': 11 };
+    const zhiOrder = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+    let NrOfIpDates =1;
+
+    const hrKiuHon = [
+        [1,1,1,2,1,2,1,1,1,2,2,2], // 甲子
+        [1,1,1,1,2,1,2,1,1,1,2,2], // 乙丑
+        [1,2,2,1,1,2,1,2,1,1,2,2], // 丙寅
+        [2,2,2,1,2,2,1,1,2,1,2,1], // 丁卯
+        [2,1,1,1,2,1,1,1,1,1,1,2], // 戊辰
+        [1,1,1,2,2,2,1,1,1,2,2,1], // 己巳
+        [1,1,1,2,2,2,1,1,1,1,1,2], // 庚午
+        [2,1,1,1,2,1,1,2,1,1,2,2], // 辛未
+        [1,1,1,1,1,1,2,1,1,1,2,2], // 壬申
+        [1,1,1,1,1,1,2,1,1,1,1,1], // 癸酉
+        [2,1,1,1,1,1,1,1,1,1,1,1], // 甲戌
+        [1,1,1,1,2,1,2,1,2,2,2,2], // 乙亥
+        [1,1,2,2,1,1,1,2,2,1,1,1], // 丙子
+        [1,2,2,1,2,1,1,1,2,1,2,1], // 丁丑
+        [2,1,1,1,1,1,1,1,1,2,2,2], // 戊寅
+        [1,1,1,1,2,2,1,1,2,1,2,1], // 己卯
+        [1,1,1,2,1,1,1,1,2,2,1,1], // 庚辰
+        [2,1,1,2,2,1,1,1,2,1,1,1], // 辛巳
+        [1,1,1,1,2,1,2,1,1,2,2,1], // 壬午
+        [1,1,1,1,2,1,1,1,2,2,1,2], // 癸未
+        [1,1,1,2,1,1,1,1,1,1,2,2], // 甲申
+        [1,1,1,1,1,1,2,2,1,1,2,2], // 乙酉
+        [1,2,1,1,1,1,2,2,1,1,1,1], // 丙戌
+        [2,1,1,1,2,1,1,1,2,1,1,1], // 丁亥
+        [2,1,1,1,1,1,1,2,1,1,2,2], // 戊子
+        [1,1,1,1,2,1,2,1,1,1,2,1], // 己丑
+        [1,1,1,1,1,2,2,1,1,2,1,1], // 庚寅
+        [2,2,1,1,2,1,1,2,2,1,1,2], // 辛卯
+        [2,1,1,1,2,1,2,2,1,1,1,1], // 壬辰
+        [1,2,2,1,1,1,2,1,1,2,1,1], // 癸巳
+        [1,1,1,2,2,2,1,1,2,1,2,2], // 甲午
+        [1,1,1,1,2,1,2,2,1,2,1,1], // 乙未
+        [1,1,1,2,1,1,2,1,1,1,1,1], // 丙申
+        [2,1,2,1,2,2,1,1,2,1,2,1], // 丁酉
+        [2,1,1,1,1,2,1,1,1,2,2,2], // 戊戌
+        [1,1,1,1,2,1,1,1,1,2,2,1], // 己亥
+        [1,1,2,2,2,2,1,1,1,1,1,2], // 庚子
+        [2,1,1,1,2,1,1,1,1,1,2,1], // 辛丑
+        [2,1,1,1,2,2,1,1,1,2,1,2], // 壬寅
+        [1,2,1,1,2,2,2,1,2,1,1,2], // 癸卯
+        [1,1,1,2,1,2,1,1,2,1,1,1], // 甲辰
+        [1,1,2,2,2,1,2,2,1,1,1,1], // 乙巳
+        [1,2,2,2,1,1,1,2,1,1,1,1], // 丙午
+        [2,1,2,1,2,1,1,1,2,1,2,1], // 丁未
+        [2,1,1,2,1,1,2,1,1,2,2,2], // 戊申
+        [1,1,2,1,1,1,1,1,1,2,2,1], // 己酉
+        [1,1,2,2,1,2,1,1,1,2,1,2], // 庚戌
+        [2,1,1,1,2,1,1,1,2,1,1,2], // 辛亥
+        [1,1,1,1,1,1,1,1,1,2,2,2], // 壬子
+        [1,1,2,1,1,1,2,1,1,1,1,2], // 癸丑
+        [2,2,1,2,1,2,1,1,1,1,1,2], // 甲寅
+        [1,2,1,1,2,1,2,1,1,1,1,1], // 乙卯
+        [2,2,2,2,1,1,2,2,1,1,1,1], // 丙辰
+        [2,1,2,1,2,1,1,1,2,1,1,1], // 丁巳
+        [1,2,1,1,2,1,2,1,1,1,2,2], // 戊午
+        [2,1,1,1,2,1,1,1,1,2,2,1], // 己酉
+        [1,1,1,2,1,1,1,1,1,2,1,2], // 庚戌
+        [2,2,1,1,1,1,1,2,2,1,2,2], // 辛亥
+        [2,2,1,1,1,1,2,1,1,2,1,1], // 壬子
+        [2,2,1,1,1,1,1,1,2,2,1,1]  // 癸亥
+    ];
+
+    function getHourlyKiuHu(bazi) {
+      const dayGanZhi = bazi[2];
+      const gan = dayGanZhi[0];
+      const zhi = dayGanZhi[1];
+      const kon = ganMap[gan];
+      const chi = zhiMap[zhi];
+
+      let val = kon - chi;
+      if (val < 0) val += 12;
+      const dayIndex = kon + val * 5;
+
+      const hourlyValues = [...hrKiuHon[dayIndex]];
+
+      switch (gan) {
+        case '甲': hourlyValues[6] = 0; break;
+        case '乙': hourlyValues[5] = 0; break;
+        case '丙': hourlyValues[4] = 0; break;
+        case '丁': hourlyValues[3] = 0; break;
+        case '戊': hourlyValues[2] = 0; break;
+        case '己': hourlyValues[1] = 0; hourlyValues[11] = 0; break;
+        case '庚': hourlyValues[0] = 0; hourlyValues[10] = 0; break;
+        case '辛': hourlyValues[9] = 0; break;
+        case '壬': hourlyValues[8] = 0; break;
+        case '癸': hourlyValues[7] = 0; break;
+      }
+
+      const yearZhi = zhiMap[bazi[0][1]];
+      const monthZhi = zhiMap[bazi[1][1]];
+      const dayZhi = zhiMap[bazi[2][1]];
+
+      for (let i = 0; i < 12; i++) {
+        const hourZhiVal = zhiMap[zhiOrder[i]];
+        if (
+          Math.abs(hourZhiVal - yearZhi) === 6 ||
+          Math.abs(hourZhiVal - monthZhi) === 6 ||
+          Math.abs(hourZhiVal - dayZhi) === 6
+        ) {
+          hourlyValues[i] = 0;
+        }
+      }
+
+      const valueMap = { 0: '凶', 1: '吉', 2: '中' };
+      const result = hourlyValues.map((value, index) => {
+        const zhiName = zhiOrder[index];
+        const mappedValue = valueMap[value];
+        return `${zhiName}${mappedValue}`;
+      });
+
+      return result.join(',');
+    }
+
+    function generateCsvData(fromDate, toDate) {
+      const data = [];
+      let currentDate = new Date(fromDate);
+
+      while (currentDate <= toDate) {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth() + 1; // getMonth() is 0-based
+        const day = currentDate.getDate();
+
+        const solar = Solar.fromYmdHms(year, month, day, 12, 0, 0);
+        const lunar = solar.getLunar();
+
+        const weekdayNumber = lunar.getWeek();
+        const weekdays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+        const weekday = weekdays[weekdayNumber];
+
+        const solarDate = solar.toYmd();
+        const bazi = lunar.getBaZi();
+        const hourlyKiuHu = getHourlyKiuHu(bazi);
+
+        data.push({
+          solarDate,
+          weekday,
+          hourlyKiuHu
+        });
+
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+      return data;
+    }
+
+    function downloadCsv(csv, filename) {
+      const csvFile = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const downloadLink = document.createElement("a");
+      downloadLink.href = URL.createObjectURL(csvFile);
+      downloadLink.download = filename;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+
+    function generateAndDownload() {
+      const fromDateStr = document.getElementById("fromDate").value;
+      const toDateStr = document.getElementById("toDate").value;
+
+      const fromDate = new Date(fromDateStr);
+      const toDate = new Date(toDateStr);
+
+      if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime()) || fromDate > toDate) {
+        alert("Invalid date range.");
+        return;
+      }
+
+      const data = generateCsvData(fromDate, toDate);
+      let csvContent = "Solar Date,Weekday,HourlyKiuHu\n";
+      data.forEach(row => {
+        csvContent += `${row.solarDate},${row.weekday},${row.hourlyKiuHu}\n`;
+      });
+      downloadCsv(csvContent, `LunarInfo_${fromDateStr}_to_${toDateStr}.csv`);
+    }
+
+    function getPreviousDay(dateStr) {
+      const formats = ['YYYY-MM-DD', 'YYYY.MM.DD', 'YYYY/MM/DD'];
+      let date;
+      for (const format of formats) {
+        date = new Date(dateStr.replace(/[-./]/g, '-'));
+        if (!isNaN(date.getTime())) break;
+      }
+      if (isNaN(date.getTime())) return null;
+
+      date.setDate(date.getDate() - 1);
+      return date.toISOString().split('T')[0];
+    }
+
+    function auMakeFile(inStr, inPreStr, inFnStr) {
+      const rcNm = inFnStr.split('#');
+      const bufArr = inStr.split('#').filter(Boolean);
+      const butPreArr = inPreStr.split('#').filter(Boolean);
+      const rc = Array(3).fill().map(() => Array(7).fill(''));
+
+      for (let cnt = 0; cnt < bufArr.length; cnt++) {
+        const eachArr = bufArr[cnt].replace(/中/g, "吉").split(',');
+        const eachPreArr = butPreArr[cnt].replace(/中/g, "吉").split(',');
+
+         //eachArr: Array(14)0: "2018-01-01"  1: "MON"  2: "子吉"  3: "丑吉"...14: "亥凶"
+       // rc[cnt][0] = `${eachArr[0]}<br>${eachArr[1]}`; // Date and Weekday
+
+        const weekdayMap = {  "MON": "星期一",  "TUE": "星期二",  "WED": "星期三", 
+         "THU": "星期四",  "FRI": "星期五",  "SAT": "星期六",  "SUN": "星期日"};
+
+        rc[cnt][0] = `${eachArr[0]}<br>${weekdayMap[eachArr[1]]}`;
+
+        // Adjust indices for previous day's hourly data (戌 = [12], 亥 = [13])
+        if (eachPreArr[12].includes("吉") && eachPreArr[13].includes("吉")) {
+          rc[cnt][1] = "7-11pm";
+        } else if (eachPreArr[12].includes("吉") && eachPreArr[13].includes("凶")) {
+          rc[cnt][1] = "7-9pm";
+        } else if (eachPreArr[12].includes("凶") && eachPreArr[13].includes("吉")) {
+          rc[cnt][1] = "9-11pm";
+        } else if (eachPreArr[12].includes("凶") && eachPreArr[13].includes("凶")) {
+          rc[cnt][1] = eachArr[4].includes("吉") ? "11pm" : "9-11pm."; // Adjusted to寅吉 (index 4)
+        }
+
+        // Morning times for selected day
+        if (eachArr[5].includes("吉") && eachArr[6].includes("吉")) { // 卯吉, 辰吉
+          rc[cnt][1] += " 或 5-8AM";
+        } else if (eachArr[5].includes("凶") && eachArr[6].includes("吉")) { // 卯凶, 辰吉 
+          rc[cnt][1] += " 或 7-8AM";
+        } else if (eachArr[5].includes("吉") && eachArr[6].includes("凶")) { // 卯吉, 辰凶
+          rc[cnt][1] += " 或 5-7AM";
+        }
+
+        rc[cnt][2] = "8am-10am"; // Fixed time slot
+        rc[cnt][5] = "1pm-5pm";   // Fixed time slot
+
+        // Mid-morning times
+        if (eachArr[7].includes("吉") && eachArr[8].includes("吉")) { // 巳吉, 午吉
+          rc[cnt][3] = "9am-1pm ";
+          rc[cnt][4] = "9am-1pm";
+        } else if (eachArr[7].includes("凶") && eachArr[8].includes("吉")) { // 巳凶, 午吉 
+          rc[cnt][3] = "9am-11am^";
+          rc[cnt][4] = "9am-11am^,-1pm";
+        } else if (eachArr[7].includes("吉") && eachArr[8].includes("凶")) { // 巳吉, 午凶 
+          rc[cnt][3] = "9am-11am ";
+          rc[cnt][4] = "9am-11am";
+        } else if (eachArr[7].includes("凶") && eachArr[8].includes("凶")) { // 巳凶, 午凶 
+          rc[cnt][3] = "9am-11am^";
+          rc[cnt][4] = "9am-11am^";
+        }
+
+        // Afternoon times
+        if (eachArr[11].includes("凶")) { // 酉凶
+          rc[cnt][6] = "(1-7pm)";
+        } else { // 酉吉
+          rc[cnt][6] = "(1-9pm)";
+        }
+
+        if (eachArr[9].includes("吉") && eachArr[10].includes("吉") && eachArr[11].includes("吉")) { // 未吉, 申吉, 酉吉
+          rc[cnt][6] += "";
+        } else if (eachArr[9].includes("吉") && eachArr[10].includes("吉") && eachArr[11].includes("凶")) { // 未吉, 申吉, 酉凶
+          rc[cnt][6] += "(5-7pm)^";
+        } else if (eachArr[9].includes("吉") && eachArr[10].includes("凶") && eachArr[11].includes("吉")) { // 未吉, 申凶, 酉吉
+          rc[cnt][6] += "(3-5pm)^";
+        } else if (eachArr[9].includes("吉") && eachArr[10].includes("凶") && eachArr[11].includes("凶")) { // 未吉, 申凶, 酉凶
+          rc[cnt][6] += "(3-7pm)^";
+        } else if (eachArr[9].includes("凶") && eachArr[10].includes("吉") && eachArr[11].includes("吉")) { // 未凶, 申吉, 酉吉
+          rc[cnt][6] += "(1-3pm)^";
+        } else if (eachArr[9].includes("凶") && eachArr[10].includes("吉") && eachArr[11].includes("凶")) { // 未凶, 申吉, 酉凶
+          rc[cnt][6] += "(1-3,5-7pm)^";
+        } else if (eachArr[9].includes("凶") && eachArr[10].includes("凶") && eachArr[11].includes("吉")) { // 未凶, 申凶, 酉吉
+          rc[cnt][6] += "(1-5pm)^";
+        } else if (eachArr[9].includes("凶") && eachArr[10].includes("凶") && eachArr[11].includes("凶")) { // 未凶, 申凶, 酉凶
+          rc[cnt][6] += "(1-7pm)^";
+        }
+      }
+
+      // Rest of the function (HTML generation and download) remains unchanged
+      // const width = bufArr.length === 1 ? 452 : bufArr.length === 2 ? 660 : 870;
+  const htmlTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <style type="text/css">
+    body {
+      font-family: "標楷體";
+    }
+
+    .table-container {
+      width: 80%;
+      margin: 10px auto;
+      border-collapse: collapse;
+      border: 3px solid red;
+    }
+
+    .table-container {
+      max-width: 400px; /* Default max-width */
+    }
+
+    .table-container.two-dates {
+      max-width: 700px;
+    }
+
+    .table-container.three-dates {
+      max-width: 900px;
+    }
+
+    .table-container td {
+      border: 1px solid red;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .table-container td:first-child {
+      text-align: right;
+      font-weight: bold;
+    }
+
+    .table-container tr:first-child td {
+      font-weight: bold;
+    }
+
+    .table-container tr:first-child td:nth-child(-n+4) {
+      border-bottom: double red;
+    }
+
+    .small {
+      font-size: 12px;
+    }
+
+    .tblName {
+      font-weight: bold;
+      font-size: 52px;
+      margin: 0 0 10 0;
+      text-decoration: underline;
+    }
+
+    .cusName {
+      font-weight: bold;
+      font-size: 32px;
+      margin: 10 0 10 0;
+    }
+
+    .remark {
+      font-weight: bold;
+      font-size: 16px;
+      margin: 15 0 50 0;
+      text-decoration: underline;
+      border-width: 0px;
+      border-style: solid;
+    }
+
+    .addr {
+      font-weight: bold;
+      font-size: 16px;
+      padding: 5px;
+      border: 1px solid black;
+      width: 690px;
+      margin: 20px auto;
+    }
+  </style>
+</head>
+<body>
+  <center>
+    <br><br><br>
+    <p class="tblName">擇吉成婚</p>
+    <p class="cusName">${rcNm[0]}先生 與 ${rcNm[1]}小姐</p>
+
+    <table class="table-container ${NrOfIpDates >= 2 ? 'two-dates' : ''} ${NrOfIpDates >= 3 ? 'three-dates' : ''}">
+      <tbody>
+        <tr>
+          <td>結婚日期：<br>　</td>
+          <td>${rc[0][0] || ''}<span style="font-size:70%">（首選）</span></td>
+          ${NrOfIpDates >= 2 ? `<td>${rc[1][0] || ''}<span style="font-size:70%">（次選）</span></td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td>${rc[2][0] || ''}<span style="font-size:70%">（三選）</span></td>` : ''}
+        </tr>
+        <tr>
+          <td>上頭 時間：</td>
+          <td><span class="small">前天</span>${rc[0][1] || ''}</td>
+          ${NrOfIpDates >= 2 ? `<td><span class="small">前天</span>${rc[1][1] || ''}</td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td><span class="small">前天</span>${rc[2][1] || ''}</td>` : ''}
+        </tr>
+        <tr>
+          <td>新郎出門迎新娘時間：</td>
+          <td>${rc[0][2] || ''}</td>
+          ${NrOfIpDates >= 2 ? `<td>${rc[1][2] || ''}</td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td>${rc[2][2] || ''}</td>` : ''}
+        </tr>
+        <tr>
+          <td>新郎到女家 時間：</td>
+          <td>${rc[0][3] || ''}</td>
+          ${NrOfIpDates >= 2 ? `<td>${rc[1][3] || ''}</td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td>${rc[2][3] || ''}</td>` : ''}
+        </tr>
+        <tr>
+          <td>新人回到男家時間：</td>
+          <td>${rc[0][4] || ''}</td>
+          ${NrOfIpDates >= 2 ? `<td>${rc[1][4] || ''}</td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td>${rc[2][4] || ''}</td>` : ''}
+        </tr>
+        <tr>
+          <td>新娘回娘家 時間：</td>
+          <td>${rc[0][5] || ''}</td>
+          ${NrOfIpDates >= 2 ? `<td>${rc[1][5] || ''}</td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td>${rc[2][5] || ''}</td>` : ''}
+        </tr>
+        <tr>
+          <td>註冊時間：</td>
+          <td>${rc[0][6] || ''}</td>
+          ${NrOfIpDates >= 2 ? `<td>${rc[1][6] || ''}</td>` : ''}
+          ${NrOfIpDates >= 3 ? `<td>${rc[2][6] || ''}</td>` : ''}
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="remark">注意﹕<br>長輩不要送新人出門，或在門口迎接新人入屋。<br>
+      結婚日期前後三個月不要出席紅、白事儀式。<br>
+      有孕女士不能來婚禮或婚宴。</p>
+    <p class="addr"><b>福榮玄學</b> (道教風水命理占卜) 電話：(852)6290 6332  網址：www.fookwing.com</p>
+  </center>
+</body>
+</html>
+`;
+
+      downloadHtml(htmlTemplate, `${inFnStr}.html`);
+    }
+
+    function downloadHtml(content, filename) {
+      const blob = new Blob([content], { type: "text/html;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function generateMarriageHtml() {
+      const inputData = document.getElementById("inputData").value.trim();
+      const lines = inputData.split('\n').filter(line => line.trim() !== '');
+
+      if (lines.length < 3) {
+        alert("Please enter two names and at least one date.");
+        return;
+      }
+
+      const rcNameMan = lines[0].trim();
+      const rcNameWoman = lines[1].trim();
+      const dates = lines.slice(2).map(date => date.trim().replace(/[./]/g, '-'));
+      const inFnStr = `${rcNameMan}#${rcNameWoman}`;
+
+      // Convert to Date objects and filter out invalid dates
+      const dateObjects = dates
+        .map(date => new Date(date))
+        .filter(date => !isNaN(date.getTime())); // Keep only valid dates
+
+      if (dateObjects.length === 0) {
+        alert("No valid dates provided. Please check your input.");
+        return;
+      }
+      NrOfIpDates= dateObjects.length;  // control the number of columns to display
+
+
+      // Calculate min and max dates
+      const timestamps = dateObjects.map(date => date.getTime());
+      const minDate = new Date(Math.min(...timestamps));
+      const maxDate = new Date(Math.max(...timestamps));
+
+      // Set fromDate to one day before the earliest date
+      const fromDate = new Date(minDate);
+      fromDate.setDate(minDate.getDate() - 1);
+      const toDate = new Date(maxDate);
+
+      const allData = generateCsvData(fromDate, toDate);
+      const dateMap = new Map(allData.map(row => [row.solarDate, row]));
+
+      let inStr = '';
+      let inPreStr = '';
+      dates.forEach((date, index) => {
+        const selectedDay = dateMap.get(date);
+        if (!selectedDay) {
+          alert(`Date ${date} not found in generated data.`);
+          return;
+        }
+
+        const prevDayStr = getPreviousDay(date);
+        const prevDay = dateMap.get(prevDayStr);
+        if (!prevDay) {
+          alert(`Previous day ${prevDayStr} not found in generated data.`);
+          return;
+        }
+
+        inStr += (index > 0 ? '#' : '') + `${selectedDay.solarDate},${selectedDay.weekday},${selectedDay.hourlyKiuHu}`;
+        inPreStr += (index > 0 ? '#' : '') + `${prevDay.solarDate},${prevDay.weekday},${prevDay.hourlyKiuHu}`;
+      });
+
+      auMakeFile(inStr, inPreStr, inFnStr);
+    }
+  </script>
+</body>
+</html>

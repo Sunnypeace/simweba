@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunar Date Calculations</title>
+    <script src="lunar-1.7.js"></script>
+    <script src="c8-html.js"></script>
+    <script src="yiday.js"></script>
+    <style>
+            body {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* 水平居中 */
+        justify-content: flex-start; /* 垂直居中，或者 flex-start 看你的需求 */
+        min-height: 100vh; /* 确保内容至少占据整个视口的高度 */
+        margin: 20; /* 移除默认的 margin */
+    }
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .date-input {
+            width: 150px;
+            padding: 5px;
+        }
+        .file-input {
+            margin-top: 10px;
+        }
+
+         .button-container {
+            display: flex;
+        }
+        .button-container button {
+            margin-right: 10px; /* 可选：添加按钮之间的间距 */
+            color : purple;
+            background-color: bisque;
+        }
+
+        #inputData {
+            width: 350px;
+            height: 170px;
+        }
+
+                /* Set textarea width id=extractedData */
+        #extractedData {
+            width: 500px;
+            height: 200px;
+        }
+
+        .help-dialog {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            z-index: 1000;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .help-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lunar Date Calculations</h1>
+    <textarea id="inputData" rows="10" cols="50">
+Male Name: 張英明
+Female Name: 李樂芝
+Male Birth Date: 1998-08-28 (solar) 12:00
+Female Birth Date: 1995-01-15 (lunar) 08:00
+Male Father Birth Date: 1959-07-14 (lunar)
+Male Mother Birth Date: 1964-05-15 (solar)
+Female Father Birth Date: 1956-11-07 (solar)
+Female Mother Birth Date: 1964-09-23 (solar)
+Grandfather Birth Date: 1944-09-23 (solar)
+Grandmother Birth Date: 1948-09-23 (solar)</textarea><br>
+
+    <!-- Selection Table -->
+    <table>
+        <tr>
+            <th>Item</th>
+            <th>Select (to Dropoff)</th>
+        </tr>
+        <tr>
+            <td>From Date</td>
+            <td><input type="date" id="fromDate" class="date-input" value="2025-02-01"></td>
+        </tr>
+        <tr>
+            <td>To Date</td>
+            <td>
+                <input type="date" id="toDate" class="date-input" value="2025-02-28">
+            </td>
+        </tr>
+        <tr>
+            <td>Solar Apr</td>
+            <td><input type="checkbox" id="solarApr" name="solarApr" checked></td>
+        </tr>
+        <tr>
+            <td>Lunar Month</td>
+            <td>
+                <label><input type="checkbox" name="lunarMonth" value="1" checked> 1</label>
+                <label><input type="checkbox" name="lunarMonth" value="2"> 2</label>
+                <label><input type="checkbox" name="lunarMonth" value="3"> 3</label>
+                <label><input type="checkbox" name="lunarMonth" value="4"> 4</label>
+                <label><input type="checkbox" name="lunarMonth" value="5"> 5</label>
+                <label><input type="checkbox" name="lunarMonth" value="6"> 6</label>
+                <label><input type="checkbox" name="lunarMonth" value="7" checked> 7</label>
+                <label><input type="checkbox" name="lunarMonth" value="8"> 8</label>
+                <label><input type="checkbox" name="lunarMonth" value="9"> 9</label>
+                <label><input type="checkbox" name="lunarMonth" value="10"> 10</label>
+                <label><input type="checkbox" name="lunarMonth" value="11"> 11</label>
+                <label><input type="checkbox" name="lunarMonth" value="12"> 12</label>
+            </td>
+        </tr>
+        <tr>
+            <td>Weekday</td>
+            <td>
+                <label><input type="checkbox" name="weekday" value="MON" checked> MON</label>
+                <label><input type="checkbox" name="weekday" value="TUE" checked> TUE</label>
+                <label><input type="checkbox" name="weekday" value="WED" checked> WED</label>
+                <label><input type="checkbox" name="weekday" value="THU" checked> THU</label>
+                <label><input type="checkbox" name="weekday" value="FRI"> FRI</label>
+                <label><input type="checkbox" name="weekday" value="SAT"> SAT</label>
+                <label><input type="checkbox" name="weekday" value="SUN"> SUN</label>
+            </td>
+        </tr>
+        <tr>
+            <td>Zhi</td>
+            <td>
+                <label><input type="checkbox" name="zhi" value="1"> 子</label>
+                <label><input type="checkbox" name="zhi" value="2"> 丑</label>
+                <label><input type="checkbox" name="zhi" value="3"> 寅</label>
+                <label><input type="checkbox" name="zhi" value="4"> 卯</label>
+                <label><input type="checkbox" name="zhi" value="5"> 辰</label>
+                <label><input type="checkbox" name="zhi" value="6"> 巳</label>
+                <label><input type="checkbox" name="zhi" value="7"> 午</label>
+                <label><input type="checkbox" name="zhi" value="8"> 未</label>
+                <label><input type="checkbox" name="zhi" value="9"> 申</label>
+                <label><input type="checkbox" name="zhi" value="10"> 酉</label>
+                <label><input type="checkbox" name="zhi" value="11"> 戌</label>
+                <label><input type="checkbox" name="zhi" value="12" checked> 亥 忌</label>
+            </td>
+        </tr>
+        <tr>
+            <td>Personal Zhi Dropoff</td>
+            <td><input type="checkbox" id="personalZhiDrop" name="personalZhiDrop"></td>
+        </tr>
+        <tr>
+            <td>Clash Birthday-Period</td>
+            <td>
+                <label><input type="checkbox" id="clashBirthdayPeriodSolarCheck" name="clashBirthdayPeriodSolarCheck"> Solar-Check</label>
+                <label><input type="checkbox" id="clashBirthdayPeriodLunarCheck" name="clashBirthdayPeriodLunarCheck"> Lunar-Check</label>
+                <input type="number" id="birthdayPeriodDays" name="birthdayPeriodDays" min="1" max="20" value="10" style="width: 60px;">
+            </td>
+        </tr>
+        <tr>
+            <td>Clash Year</td>
+            <td><input type="checkbox" id="clashYearDrop" name="clashYearDrop" checked></td>
+        </tr>
+        <tr>
+            <td>Clash Month</td>
+            <td><input type="checkbox" id="clashMonthDrop" name="clashMonthDrop" checked></td>
+        </tr>
+        <tr>
+            <td>Clash Day</td>
+            <td><input type="checkbox" id="clashDayDrop" name="clashDayDrop" checked></td>
+        </tr>
+        <tr>
+            <td>JieQi</td>
+            <td><input type="checkbox" id="jieqi" name="jieqi" checked></td>
+        </tr>
+    </table>
+
+
+    <div class="button-container">
+        <button onclick="processData()">1-排八字 html</button>
+        <button onclick="generateLunarCsv()">2-每日宜忌 CSV</button>
+        <button onclick="showHelp()">Help</button>
+    </div>
+
+    <div id="output"></div>
+    <br>
+    <textarea id="extractedData" rows="10" cols="50" readonly></textarea>
+
+    <!-- Help Dialog -->
+    <div id="helpDialog" class="help-dialog">
+        <h2>結婚擇日</h2>
+        <p>This <b>Selectday.html</b> will use:</p>
+        <ul>
+            <li><b>lunar-js.js</b>: Main to calculate Bazi, Solar-Lunar</li>
+            <li><b>c8-html.js</b>: Construct w8 HTML for every birthday</li>
+            <li><b>yiday.js</b>: Create from-date to to-date 宜忌 CSV for Selectday.html</li>
+        </ul>
+        <h3>Operation Steps for Selectday.html</h3>
+        <ol>
+            <li>Copy the wedding form data from the email to the first textBox</li>
+            <li>Set the preferred date: From - To date</li>
+            <li>Hit the <b>Process Data</b> button to generate person 干支</li>
+            <li>Click check for the selection requirement for dropoff:
+                <ul>
+                    <li><b>Solar Apr</b>: 礑曆 4月</li>
+                    <li><b>Lunar Month</b>: 主要是農曆 7,9月</li>
+                    <li><b>Weekday</b>: MON - SUN</li>
+                    <li><b>Zhi</b>: 12 地支</li>
+                    <li><b>Personal Zhi Dropoff</b>: Click to set 每入的沖</li>
+                    <li><b>Clash Year</b>: 歲破</li>
+                    <li><b>Clash Month</b>: 月破</li>
+                    <li><b>Clash Day</b>: 日破</li>
+                    <li><b>JieQi</b>: 節氣</li>
+                </ul>
+            </li>
+            <li>Click <b>Generate Lunar CSV</b>: Generate filtered/rejected files</li>
+            <li>Put <b>filtered.csv</b> to OpenOffice Excel and check the date range with user request</li>
+			<li>Sort the Yi-Count and Select the AuDates </li>
+			<li>Run <b>Yiday.html</b>, input the selected AuDates and generate AuDate  username.html</li>
+        </ol>
+        <button onclick="hideHelp()">Close</button>
+    </div>
+    <div id="helpOverlay" class="help-overlay" onclick="hideHelp()"></div>
+
+    <script>
+        let personalZhiClashes = [];
+        let birthDates = [];
+
+        function processData() {
+            const inputData = document.getElementById("inputData").value;
+            const lines = inputData.split('\n');
+            const data = {};
+            birthDates = [];
+
+            lines.forEach(line => {
+                const firstColonIndex = line.indexOf(':');
+                if (firstColonIndex !== -1) {
+                    const key = line.slice(0, firstColonIndex).trim();
+                    const value = line.slice(firstColonIndex + 1).trim();
+                    data[key] = value;
+                }
+            });
+
+            const maleName = data["Male Name"] ? data["Male Name"].split(' ')[0] : "unknown";
+            const femaleName = data["Female Name"] ? data["Female Name"].split(' ')[0] : "unknown";
+            const folderName = maleName + '-' + femaleName;
+
+            let extractedText = folderName + "\n";
+
+            for (const key in data) {
+                if (key.includes("Birth Date")) {
+                    const birthData = data[key];
+                    const dateMatch = birthData.match(/(\d{4}-\d{2}-\d{2})\s*(?:\((solar|lunar)\))?\s*(\d{2}:\d{2})?/);
+                    if (dateMatch) {
+                        const dateStr = dateMatch[1];
+                        const dateType = dateMatch[2] || "solar";
+                        const timePart = dateMatch[3] || "";
+                        const [year, month, day] = dateStr.split('-').map(Number);
+                        const [hour, minute] = timePart ? timePart.split(':').map(Number) : [12, 0];
+
+                        let solar, lunar, solarDate, lunarDate;
+
+                        if (dateType === "lunar") {
+                            lunar = Lunar.fromYmdHms(year, month, day, hour, minute, 0);
+                            solar = lunar.getSolar();
+                            solarDate = `${solar.getYear()}-${solar.getMonth().toString().padStart(2, '0')}-${solar.getDay().toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                            lunarDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                        } else {
+                            solar = Solar.fromYmdHms(year, month, day, hour, minute, 0);
+                            lunar = solar.getLunar();
+                            solarDate = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')} ${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+                            lunarDate = `${lunar.getYear()}-${lunar.getMonth().toString().padStart(2, '0')}-${lunar.getDay().toString().padStart(2, '0')}`;
+                        }
+
+                        birthDates.push({ key, solarDate, lunarDate });
+
+                        let displayName, saveFileName, sex;
+                        if (key === "Male Birth Date") {
+                            displayName = maleName;
+                            saveFileName = maleName;
+                            sex = "male";
+                        } else if (key === "Female Birth Date") {
+                            displayName = femaleName;
+                            saveFileName = femaleName;
+                            sex = "female";
+                        } else if (key === "Male Father Birth Date") {
+                            displayName = "男父 ";
+                            saveFileName = "男父";
+                            sex = "male";
+                        } else if (key === "Male Mother Birth Date") {
+                            displayName = "男母 ";
+                            saveFileName = "男母";
+                            sex = "female";
+                        } else if (key === "Female Father Birth Date") {
+                            displayName = "女父 ";
+                            saveFileName = "女父";
+                            sex = "male";
+                        } else if (key === "Female Mother Birth Date") {
+                            displayName = "女母 ";
+                            saveFileName = "女母";
+                            sex = "female";
+                        } else if (key === "Grandfather Birth Date") {
+                            displayName = "爺爺";
+                            saveFileName = "爺爺";
+                            sex = "male";
+                        } else if (key === "Grandmother Birth Date") {
+                            displayName = "婆婆";
+                            saveFileName = "婆婆";
+                            sex = "female";
+                        }
+
+                        const w8result = processC8(saveFileName, birthData, sex);
+                        if (w8result) {
+                            const dateDisplay = dateType === "solar"
+                                ? `${displayName} 西曆:${solarDate}, 農曆:${lunarDate}`
+                                : `${displayName} 西曆:${solarDate}, 農曆:${lunarDate}`;
+                            const lineText = `${dateDisplay}, 年:${w8result.yearGan}${w8result.yearZhi}, 日:${w8result.dayGan}${w8result.dayZhi}`;
+                            extractedText += lineText + "\n";
+                        }
+                    }
+                } else {
+                    extractedText += key + ": " + data[key] + "\n";
+                }
+            }
+
+            document.getElementById("extractedData").value = extractedText;
+
+            personalZhiClashes = [];
+            const zhiMap = {
+                '子': 1, '丑': 2, '寅': 3, '卯': 4, '辰': 5, '巳': 6,
+                '午': 7, '未': 8, '申': 9, '酉': 10, '戌': 11, '亥': 12
+            };
+            const reverseZhiMap = Object.fromEntries(Object.entries(zhiMap).map(([k, v]) => [v, k]));
+            const extractedLines = extractedText.split('\n');
+            let birthDateCount = 0;
+
+            extractedLines.forEach(line => {
+                const match = line.match(/年:([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥]),\s*日:([甲乙丙丁戊己庚辛壬癸][子丑寅卯辰巳午未申酉戌亥])/);
+                if (match) {
+                    const yearZhi = match[1].slice(-1);
+                    const dayZhi = match[2].slice(-1);
+                    const yearZhiNum = zhiMap[yearZhi];
+                    const dayZhiNum = zhiMap[dayZhi];
+                    const yearClashNum = (yearZhiNum + 6 - 1) % 12 + 1;
+                    const dayClashNum = (dayZhiNum + 6 - 1) % 12 + 1;
+                    
+                    if (!personalZhiClashes.includes(yearClashNum)) personalZhiClashes.push(yearClashNum);
+                    if (birthDateCount < 2 && !personalZhiClashes.includes(dayClashNum)) {
+                        personalZhiClashes.push(dayClashNum);
+                    }
+                    birthDateCount++;
+                }
+            });
+            console.log("Personal Zhi Clashes:", personalZhiClashes);
+        }
+
+        function processC8(saveFileName, birthData, sex) {
+            if (birthData) {
+                const dateMatch = birthData.match(/(\d{4}-\d{2}-\d{2})\s*(?:\((solar|lunar)\))?\s*(\d{2}:\d{2})?/);
+                if (!dateMatch) {
+                    console.error("Invalid date format:", birthData);
+                    return;
+                }
+                const datePart = dateMatch[1];
+                const dateType = dateMatch[2] === "lunar" ? "lunar" : "solar";
+                const timePart = dateMatch[3] || "12:00";
+                const [year, month, day] = datePart.split('-').map(Number);
+                let hour = 12, minute = 0;
+                if (timePart) {
+                    [hour, minute] = timePart.split(':').map(Number);
+                }
+                const birthTime = hour.toString().padStart(2, '0') + ":" + minute.toString().padStart(2, '0');
+                return c8html([saveFileName + '.html', sex, saveFileName, dateType, datePart, birthTime]);
+            }
+        }
+
+        function parseCSV(csvText) {
+            const lines = csvText.trim().split('\n');
+            const headers = ["Solar Date", "Lunar Date", "Weekday", "Jie", "YrGZ", "MnGZ", "DyGZ", "Yi Count", "Ji Count", "Yi Items", "Ji Items"];
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(v => v.replace(/^"|"$/g, '').trim());
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] || '';
+                });
+                result.push(row);
+            }
+            console.log("Parsed CSV rows:", result);
+            return result;
+        }
+
+        function getLunarMonthNumber(lunarDate) {
+            const monthNumber = parseInt(lunarDate.split('-')[1]);
+            console.log(`Lunar Date: ${lunarDate}, Month Number: ${monthNumber}`);
+            return monthNumber;
+        }
+
+        function getLunarDayNumber(lunarDate) {
+            const dayNumber = parseInt(lunarDate.split('-')[2]);
+            console.log(`Lunar Date: ${lunarDate}, Day Number: ${dayNumber}`);
+            return dayNumber;
+        }
+
+        function getZhiNumber(gz) {
+            const zhiMap = {
+                '子': 1, '丑': 2, '寅': 3, '卯': 4, '辰': 5, '巳': 6,
+                '午': 7, '未': 8, '申': 9, '酉': 10, '戌': 11, '亥': 12
+            };
+            const zhi = gz.slice(-1);
+            const zhiNumber = zhiMap[zhi];
+            console.log(`GanZhi: ${gz}, Zhi: ${zhi}, Zhi Number: ${zhiNumber}`);
+            return zhiNumber;
+        }
+
+        function checkClash(zhiNumber1, zhiNumber2) {
+            if (zhiNumber1 === null || zhiNumber2 === null) return false;
+            const diff = Math.abs(zhiNumber1 - zhiNumber2);
+            return diff === 6;
+        }
+
+        function daysBetweenDates(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            const diffMs = Math.abs(d1 - d2);
+            return Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        }
+
+        function downloadCsv(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function checkZhiClashes() {
+            const zhiCheckboxes = document.querySelectorAll('input[name="zhi"]');
+            zhiCheckboxes.forEach(checkbox => {
+                const zhiValue = parseInt(checkbox.value); // e.g., "1" for "子"
+                checkbox.checked = personalZhiClashes.includes(zhiValue);
+            });
+        }
+
+        // Event listener for Personal Zhi Dropoff checkbox
+        document.getElementById("personalZhiDrop").addEventListener('change', function() {
+            if (this.checked) {
+                checkZhiClashes();
+            } else {
+                const zhiCheckboxes = document.querySelectorAll('input[name="zhi"]');
+                zhiCheckboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
+        });
+
+        function filterCSV(csvData) {
+            const parsedData = parseCSV(csvData);
+            const solarAprChecked = document.getElementById("solarApr").checked;
+            const lunarMonths = Array.from(document.querySelectorAll('input[name="lunarMonth"]:checked')).map(cb => parseInt(cb.value));
+            const weekdays = Array.from(document.querySelectorAll('input[name="weekday"]:checked')).map(cb => cb.value);
+            const zhiValues = Array.from(document.querySelectorAll('input[name="zhi"]:checked')).map(cb => parseInt(cb.value));
+            const clashYearChecked = document.getElementById("clashYearDrop").checked;
+            const clashMonthChecked = document.getElementById("clashMonthDrop").checked;
+            const clashDayChecked = document.getElementById("clashDayDrop").checked;
+            const jieQiChecked = document.getElementById("jieqi").checked;
+            const clashBirthdayPeriodSolarChecked = document.getElementById("clashBirthdayPeriodSolarCheck").checked;
+            const clashBirthdayPeriodLunarChecked = document.getElementById("clashBirthdayPeriodLunarCheck").checked;
+            const birthdayPeriodDays = parseInt(document.getElementById("birthdayPeriodDays").value) || 10;
+
+            console.log("Filter Settings:", { solarAprChecked, lunarMonths, weekdays, zhiValues, clashYearChecked, clashMonthChecked, clashDayChecked, jieQiChecked, clashBirthdayPeriodSolarChecked, clashBirthdayPeriodLunarChecked, birthdayPeriodDays });
+
+            const rejectedRows = [];
+            const filteredRows = parsedData.filter(row => {
+                const solarDate = row["Solar Date"];
+                const lunarDate = row["Lunar Date"];
+                const lunarMonth = getLunarMonthNumber(row["Lunar Date"]);
+                const lunarDay = getLunarDayNumber(row["Lunar Date"]);
+                const weekday = row["Weekday"];
+                const zhiNumber = getZhiNumber(row["DyGZ"]);
+                const yrZhiNumber = getZhiNumber(row["YrGZ"]);
+                const mnZhiNumber = getZhiNumber(row["MnGZ"]);
+                const jie = row["Jie"];
+
+                const solarAprDrop = solarAprChecked && parseInt(solarDate.split('-')[1]) === 4;
+                const lunarMonthDrop = lunarMonths.length > 0 && lunarMonth !== null && lunarMonths.includes(lunarMonth);
+                const weekdayDrop = weekdays.length > 0 && weekdays.includes(weekday);
+                const zhiDrop = zhiValues.length > 0 && zhiNumber !== null && zhiValues.includes(zhiNumber);
+                const clashYearDrop = clashYearChecked && checkClash(yrZhiNumber, zhiNumber);
+                const clashMonthDrop = clashMonthChecked && checkClash(yrZhiNumber, mnZhiNumber);
+                const clashDayDrop = clashDayChecked && checkClash(mnZhiNumber, zhiNumber);
+                const jieQiDrop = jieQiChecked && jie && jie !== "";
+
+                let clashBirthdayPeriodSolarDrop = false;
+                if (clashBirthdayPeriodSolarChecked) {
+                    const [_, solarMonth, solarDay] = solarDate.split('-').map(Number);
+                    const fixedYear = "2024";
+                    const elderBirthDates = birthDates.filter(birth => 
+                        birth.key.includes("Father") || birth.key.includes("Mother") || 
+                        birth.key.includes("Grandfather") || birth.key.includes("Grandmother")
+                    );
+                    clashBirthdayPeriodSolarDrop = elderBirthDates.some(birth => {
+                        const datePart = birth.solarDate.split(' ')[0];
+                        const [__, birthMonth, birthDay] = datePart.split('-').map(Number);
+                        const normalizedRowDate = `${fixedYear}-${solarMonth.toString().padStart(2, '0')}-${solarDay.toString().padStart(2, '0')}`;
+                        const normalizedBirthDate = `${fixedYear}-${birthMonth.toString().padStart(2, '0')}-${birthDay.toString().padStart(2, '0')}`;
+                        const diff = daysBetweenDates(normalizedRowDate, normalizedBirthDate);
+                        return diff <= birthdayPeriodDays;
+                    });
+                }
+
+                let clashBirthdayPeriodLunarDrop = false;
+                if (clashBirthdayPeriodLunarChecked) {
+                    const [_, lunarMonthNum, lunarDayNum] = lunarDate.split('-').map(Number);
+                    const fixedYear = "2024";
+                    const elderBirthDates = birthDates.filter(birth => 
+                        birth.key.includes("Father") || birth.key.includes("Mother") || 
+                        birth.key.includes("Grandfather") || birth.key.includes("Grandmother")
+                    );
+                    clashBirthdayPeriodLunarDrop = elderBirthDates.some(birth => {
+                        const [__, birthMonth, birthDay] = birth.lunarDate.split('-').map(Number);
+                        const normalizedRowDate = `${fixedYear}-${lunarMonthNum.toString().padStart(2, '0')}-${lunarDayNum.toString().padStart(2, '0')}`;
+                        const normalizedBirthDate = `${fixedYear}-${birthMonth.toString().padStart(2, '0')}-${birthDay.toString().padStart(2, '0')}`;
+                        const diff = daysBetweenDates(normalizedRowDate, normalizedBirthDate);
+                        return diff <= birthdayPeriodDays;
+                    });
+                }
+
+                const reasons = [];
+                if (solarAprDrop) reasons.push("Solar April");
+                if (lunarMonthDrop) reasons.push(`Lunar Month ${lunarMonth}`);
+                if (weekdayDrop) reasons.push(`Weekday ${weekday}`);
+                if (zhiDrop) reasons.push(`Zhi ${row["DyGZ"].slice(-1)}`);
+                if (clashYearDrop) reasons.push(`Clash Year (${row["YrGZ"]} vs ${row["DyGZ"]})`);
+                if (clashMonthDrop) reasons.push(`Clash Month (${row["YrGZ"]} vs ${row["MnGZ"]})`);
+                if (clashDayDrop) reasons.push(`Clash Day (${row["MnGZ"]} vs ${row["DyGZ"]})`);
+                if (jieQiDrop) reasons.push("JieQi");
+                if (clashBirthdayPeriodSolarDrop) reasons.push(`Clash Birthday-Period Solar (±${birthdayPeriodDays} days)`);
+                if (clashBirthdayPeriodLunarDrop) reasons.push(`Clash Birthday-Period Lunar (±${birthdayPeriodDays} days)`);
+
+                const drop = solarAprDrop || lunarMonthDrop || weekdayDrop || zhiDrop || clashYearDrop || clashMonthDrop || clashDayDrop || jieQiDrop || clashBirthdayPeriodSolarDrop || clashBirthdayPeriodLunarDrop;
+
+                if (drop) {
+                    rejectedRows.push({ ...row, Reason: reasons.join(', ') });
+                }
+
+                return !drop;
+            });
+
+            const header = "Solar Date,Lunar Date,Weekday,Jie,YrGZ,MnGZ,DyGZ,Yi Count,Ji Count\n";
+            const filteredCsv = filteredRows.length === 0 ? header : header + filteredRows.map(row => 
+                `${row["Solar Date"]},${row["Lunar Date"]},${row["Weekday"]},${row["Jie"]},${row["YrGZ"]},${row["MnGZ"]},${row["DyGZ"]},${row["Yi Count"]},${row["Ji Count"]}`
+            ).join('\n');
+
+            const rejectHeader = "Solar Date,Lunar Date,Weekday,Jie,YrGZ,MnGZ,DyGZ,Yi Count,Ji Count,Reason\n";
+            const rejectCsv = rejectedRows.length === 0 ? rejectHeader : rejectHeader + rejectedRows.map(row => 
+                `${row["Solar Date"]},${row["Lunar Date"]},${row["Weekday"]},${row["Jie"]},${row["YrGZ"]},${row["MnGZ"]},${row["DyGZ"]},${row["Yi Count"]},${row["Ji Count"]},${row["Reason"]}`
+            ).join('\n');
+
+            downloadCsv(filteredCsv, "filtered.csv");
+            if (rejectedRows.length > 0) {
+                downloadCsv(rejectCsv, "reject.csv");
+            } else {
+                console.log("No rows were rejected.");
+            }
+
+            return filteredCsv;
+        }
+
+        function generateLunarCsv() {
+            const fromDate = document.getElementById("fromDate").value;
+            const toDate = document.getElementById("toDate").value;
+
+            if (!fromDate || !toDate) {
+                alert("Please select both From Date and To Date.");
+                return;
+            }
+
+            const fromYearMonth = fromDate.slice(0, 7);
+            const toYearMonth = toDate.slice(0, 7);
+
+            try {
+                const csvData = downloadLunarCsvRange(fromYearMonth, toYearMonth);
+                console.log("Raw CSV Data:", csvData);
+                const filteredCsv = filterCSV(csvData);
+                console.log("Filtered CSV saved as filtered.csv");
+            } catch (error) {
+                console.error("Error generating CSV:", error);
+                alert("Failed to generate Lunar CSV. Check console for details.");
+            }
+        }
+
+        // Help Dialog Functions
+        function showHelp() {
+            document.getElementById("helpDialog").style.display = "block";
+            document.getElementById("helpOverlay").style.display = "block";
+        }
+
+        function hideHelp() {
+            document.getElementById("helpDialog").style.display = "none";
+            document.getElementById("helpOverlay").style.display = "none";
+        }
+    </script>
+</body>
+</html>
