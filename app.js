@@ -198,7 +198,7 @@ app.post("/api/send-email", async (req, res) => {
         subject = `bz-2p : ${saveFilename}-${name1}`;
 
         const saveFilename1 = saveFilename +'-1';
-        const hostip1 = `${HOST_IP}/${saveFilename1}.html`;
+        const hostip1 = `${HOST_IP}/${saveFilename1}.html` ;
         // const hostip1 = `http://${HOST_IP}/${saveFilename1}.html`;
 
         saveFilename =`${queueCntStr}-${birthdate2}`;       
