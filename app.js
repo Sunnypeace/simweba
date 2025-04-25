@@ -198,11 +198,12 @@ app.post("/api/send-email", async (req, res) => {
         subject = `bz-2p : ${saveFilename}-${name1}`;
 
         const saveFilename1 = saveFilename +'-1';
-        const hostip1 = `http://${HOST_IP}/${saveFilename1}.html`;
+        const hostip1 = `${HOST_IP}/${saveFilename1}.html`;
+        // const hostip1 = `http://${HOST_IP}/${saveFilename1}.html`;
 
         saveFilename =`${queueCntStr}-${birthdate2}`;       
         const saveFilename2 = saveFilename +'-2';
-        const hostip2 = `http://${HOST_IP}/${saveFilename2}.html`;
+        const hostip2 = `${HOST_IP}/${saveFilename2}.html`;
 
           formattedText = `
             Person 1:
@@ -250,7 +251,7 @@ app.post("/api/send-email", async (req, res) => {
         saveFilename =`${queueCntStr}-${birthdate1}`;
 
         subject = `bz-1p : ${saveFilename}-${name1}`;
-        const hostipall = `http://${HOST_IP}/${saveFilename}.html`;
+        const hostipall = `${HOST_IP}/${saveFilename}.html`;
 
         formattedText = `
             Gender: ${gender1}
